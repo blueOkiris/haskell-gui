@@ -70,7 +70,7 @@ instance GuiObj_ Container where
         let handleFunc = (`objHandle` event)
         subForeach children objs handleFunc
     
-    minSize = contMinSize
+    objMinSize = contMinSize
 
 data Margin = Margin
     { marginChildren    :: [GuiObj]
