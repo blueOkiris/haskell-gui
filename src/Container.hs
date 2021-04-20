@@ -22,6 +22,7 @@ mapi ind transform list
 class Container_ a where
     contChildren        :: a -> [GuiObj]
     contBg              :: a -> Color
+    contBorder          :: a -> (Int, Color)
     contShape           ::
         a -> (Int, Int) -> (Int, Int) -> ((Int, Int), (Int, Int))
     contChildrenShapes  ::
@@ -31,22 +32,34 @@ data Container = forall a . Container_ a => Container a
 instance Container_ Container where
     contChildren (Container a) = contChildren a
     contBg (Container a) = contBg a
+    contBorder (Container a) = contBorder a
     contShape (Container a) = contShape a
     contChildrenShapes (Container a) = contChildrenShapes a
     contMinSize (Container a) = contMinSize a
 
 instance GuiObj_ Container where
     objDraw cont pos size = do
-        -- Draw a rectangle where we are
-        let bgColor = contBg cont
+        -- Draw a border rectangle where we are and a fill inside it
+        let borderColor = snd $ contBorder cont
+        let borderSize = int2Float $ fst $ contBorder cont
         let selfShape = contShape cont pos size
         let width = int2Float $ fst $ snd selfShape
+        let innerWidth = width - 2 * borderSize
         let height = int2Float $ snd $ snd selfShape
+        let innerHeight = height - 2 * borderSize
         let x = int2Float (fst $ fst selfShape) + (width / 2)
         let y = int2Float (snd $ fst selfShape) + (height / 2)
-        let selfPic =
-                translate x (-y) $ color bgColor $
+        let innerX =
+                int2Float (fst $ fst selfShape) + (innerWidth / 2) + borderSize
+        let innerY =
+                int2Float (snd $ fst selfShape) + (innerHeight / 2) + borderSize
+        let bgColor = contBg cont
+        let selfPic = Pictures
+                [ translate x (-y) $ color borderColor $
                     rectangleSolid width height
+                , translate innerX (-innerY) $
+                    color bgColor $
+                        rectangleSolid innerWidth innerHeight ]
 
         -- Call draw with all the children
         let children = contChildren cont
@@ -75,11 +88,13 @@ instance GuiObj_ Container where
 data Margin = Margin
     { marginChildren    :: [GuiObj]
     , marginBg          :: Color
+    , marginBorder      :: (Int, Color)
     , margins           :: ((Int, Int), (Int, Int))
     , margMinSize       :: (Int, Int) }
 instance Container_ Margin where
     contChildren = marginChildren
     contBg = marginBg
+    contBorder = marginBorder
     contShape marg (x, y) (w, h) = do
         let mX = fst $ fst $ margins marg
         let mY = snd $ fst $ margins marg
@@ -93,11 +108,13 @@ instance Container_ Margin where
 data HBox = HBox
     { hBoxChildren      :: [GuiObj]
     , hBoxBg            :: Color
+    , hBoxBorder        :: (Int, Color)
     , hSep              :: Int
     , hBoxMinSize       :: (Int, Int) }
 instance Container_ HBox where
     contChildren = hBoxChildren
     contBg = hBoxBg
+    contBorder = hBoxBorder
     contShape hBox (x, y) (w, h) = ((x, y), (w, h))
     contChildrenShapes hBox (x, y) (w, h) = do
         let childrenLen = length $ hBoxChildren hBox
@@ -110,11 +127,13 @@ instance Container_ HBox where
 data VBox = VBox
     { vBoxChildren      :: [GuiObj]
     , vBoxBg            :: Color
+    , vBoxBorder        :: (Int, Color)
     , vSep              :: Int
     , vBoxMinSize       :: (Int, Int) }
 instance Container_ VBox where
     contChildren = vBoxChildren
     contBg = vBoxBg
+    contBorder = vBoxBorder
     contShape _ pos size = (pos, size)
     contChildrenShapes vBox (x, y) (w, h) = do
         let childrenLen = length $ vBoxChildren vBox
