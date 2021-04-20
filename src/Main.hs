@@ -14,20 +14,26 @@ main = run "Test" (640, 480)
                     [ GuiObj $ Container $ Margin 
                         { marginChildren = []
                         , marginBg = blue
-                        , margins = ((5, 5), (5, 5)) }
+                        , margins = ((5, 5), (5, 5))
+                        , margMinSize = (100, 100) }
                     , GuiObj $ Container $ VBox 
                         { vBoxChildren =
                             [ GuiObj $ Container $ Margin
                                 { marginChildren = []
                                 , marginBg = yellow
-                                , margins = ((5, 5), (5, 5)) }
+                                , margins = ((5, 5), (5, 5))
+                                , margMinSize = (100, 100) }
                             , GuiObj $ Container $ Margin
                                 { marginChildren = []
                                 , marginBg = orange
-                                , margins = ((5, 5), (5, 5)) } ]
+                                , margins = ((5, 5), (5, 5))
+                                , margMinSize = (100, 100) } ]
                         , vBoxBg = red
-                        , vSep = 40 } ]
+                        , vSep = 40
+                        , vBoxMinSize = (100, 100) } ]
                 , hBoxBg = green
-                , hSep = 20 } ]
+                , hSep = 20
+                , hBoxMinSize = (100, 100) } ]
         , marginBg = makeColor 0 0 0 0
-        , margins = ((5, 20), (40, 60)) } ]
+        , margins = ((5, 20), (40, 60)) 
+        , margMinSize = (100, 100) } ]

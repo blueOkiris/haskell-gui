@@ -26,12 +26,14 @@ class Container_ a where
         a -> (Int, Int) -> (Int, Int) -> ((Int, Int), (Int, Int))
     contChildrenShapes  ::
         a -> (Int, Int) -> (Int, Int) -> [((Int, Int), (Int, Int))]
+    contMinSize         :: a -> (Int, Int)
 data Container = forall a . Container_ a => Container a
 instance Container_ Container where
     contChildren (Container a) = contChildren a
     contBg (Container a) = contBg a
     contShape (Container a) = contShape a
     contChildrenShapes (Container a) = contChildrenShapes a
+    contMinSize (Container a) = contMinSize a
 
 instance GuiObj_ Container where
     objDraw cont pos size = do
@@ -67,11 +69,14 @@ instance GuiObj_ Container where
         let children = contChildren cont
         let handleFunc = (`objHandle` event)
         subForeach children objs handleFunc
+    
+    minSize = contMinSize
 
 data Margin = Margin
     { marginChildren    :: [GuiObj]
     , marginBg          :: Color
-    , margins           :: ((Int, Int), (Int, Int))}
+    , margins           :: ((Int, Int), (Int, Int))
+    , margMinSize       :: (Int, Int) }
 instance Container_ Margin where
     contChildren = marginChildren
     contBg = marginBg
@@ -83,11 +88,13 @@ instance Container_ Margin where
         ((x + mX, y + mY), (w - mX - mW, h - mY - mH))
     contChildrenShapes marg pos size = do
         map (const $ contShape marg pos size) (marginChildren marg)
+    contMinSize = margMinSize
 
 data HBox = HBox
     { hBoxChildren      :: [GuiObj]
     , hBoxBg            :: Color
-    , hSep              :: Int }
+    , hSep              :: Int
+    , hBoxMinSize       :: (Int, Int) }
 instance Container_ HBox where
     contChildren = hBoxChildren
     contBg = hBoxBg
@@ -98,11 +105,13 @@ instance Container_ HBox where
         let width = w `div` childrenLen
         let transform = \def ind -> ((x + ind * width, y), (width, h))
         mapi 0 transform sizeArr
+    contMinSize = hBoxMinSize
 
 data VBox = VBox
     { vBoxChildren      :: [GuiObj]
     , vBoxBg            :: Color
-    , vSep              :: Int }
+    , vSep              :: Int
+    , vBoxMinSize       :: (Int, Int) }
 instance Container_ VBox where
     contChildren = vBoxChildren
     contBg = vBoxBg
@@ -113,3 +122,4 @@ instance Container_ VBox where
         let height = h `div` childrenLen
         let transform = \def ind -> ((x, y + ind * height), (w, height))
         mapi 0 transform sizeArr
+    contMinSize = vBoxMinSize

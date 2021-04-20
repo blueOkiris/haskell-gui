@@ -9,11 +9,13 @@ class GuiObj_ a where
     objDraw     :: a -> (Int, Int) -> (Int, Int) -> Picture
     objUpdate   :: a -> Float -> [GuiObj] -> [GuiObj]
     objHandle   :: a -> Event -> [GuiObj] -> [GuiObj]
+    minSize     :: a -> (Int, Int)
 data GuiObj = forall a . GuiObj_ a => GuiObj a
 instance GuiObj_ GuiObj where
     objDraw (GuiObj a) = objDraw a
     objUpdate (GuiObj a) = objUpdate a
     objHandle (GuiObj a) = objHandle a
+    minSize (GuiObj a) = minSize a
 
 foreach :: Int -> [a] -> (a -> [a] -> [a]) -> [a]
 foreach index curr transform
