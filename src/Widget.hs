@@ -1,7 +1,8 @@
 {-# LANGUAGE ExistentialQuantification #-}
-module Widget(Widget(..)) where
+module Widget(Widget(..), Button(..), ButtonState(..)) where
 
 import Graphics.Gloss.Interface.IO.Game
+import GHC.Float.RealFracMethods
 import Gui
 
 class Widget_ a where
@@ -22,8 +23,41 @@ instance GuiObj_ Widget where
     objHandle = widgHandle
     objMinSize = widgMinSize
 
+data ButtonState = ButtonNormal | ButtonHover | ButtonClick deriving(Eq)
 data Button = Button
     { btnOnClick        :: [GuiObj] -> [GuiObj]
+    , btnText           :: String
+    , btnBorder         :: (Int, Color)
+    , btnState          :: ButtonState
     , btnNormalColor    :: Color
     , btnHoverColor     :: Color
-    , btnClickColor     :: Color }
+    , btnClickColor     :: Color
+    , btnMinSize        :: (Int, Int) }
+instance Widget_ Button where
+    widgMinSize = btnMinSize
+    widgUpdate _ _ objs = objs
+    widgDraw btn (x, y) (w, h) = do
+        let borderRect =
+                translate
+                (int2Float x + (int2Float w / 2))
+                (int2Float y + (int2Float h / 2)) $
+                    color (snd $ btnBorder btn) $
+                        rectangleSolid (int2Float w) (int2Float h)
+        let borderSize = int2Float $ fst $ btnBorder btn
+        let fillColor
+              | btnState btn == ButtonNormal = btnNormalColor btn
+              | btnState btn == ButtonHover = btnHoverColor btn
+              | btnState btn == ButtonClick = btnClickColor btn
+              | otherwise =  black
+        let innerRect =
+                translate
+                (int2Float x + borderSize + (int2Float w - 2 * borderSize) / 2)
+                (int2Float y + borderSize
+                        + (int2Float h - 2 * borderSize) / 2) $
+                    color fillColor $
+                        rectangleSolid 
+                            (int2Float w - 2 * borderSize)
+                            (int2Float h - 2 * borderSize)
+        Pictures [ borderRect, innerRect ]
+    widgHandle btn (EventMotion (x, y)) objs =
+        objs

@@ -49,4 +49,4 @@ run title defSize guiObjs = do
     let win = InWindow title defSize (startX, startY)
     
     let startState = (defSize, guiObjs)
-    playIO win black 100 startState winDraw winHandle winUpdate
+    playIO win black 120 startState winDraw winHandle winUpdate
